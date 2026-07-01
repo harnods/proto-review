@@ -42,6 +42,7 @@ create table proto_review_annotations (
   id uuid primary key default gen_random_uuid(),
   project_id text not null,
   route_key text not null,
+  path text, -- concrete URL at creation time, used by the All comments panel to navigate
   x_pct float not null,
   y_pct float not null,
   author text not null default 'Anonymous',
@@ -103,6 +104,21 @@ app.use(createProtoReview({
   each other.
 - Review mode persists across page navigation for the browser session
   (`sessionStorage`), so it doesn't drop when the app's router changes the URL.
+- **Show comments** (in the toolbar) opens a cross-page inbox of every comment
+  in the project, in a dark panel that pushes the whole app left instead of
+  covering it. Clicking a comment navigates to the exact page it was left on
+  and opens its popover automatically.
+
+## Migrating an existing database
+
+If you set up the tables before the `path` column existed, add it:
+
+```sql
+alter table proto_review_annotations add column if not exists path text;
+```
+
+Older rows without a `path` fall back to their `route_key` in the All
+comments panel (works for static pages, not exact for parameterized ones).
 
 ## Own toggle instead of the floating launcher
 
