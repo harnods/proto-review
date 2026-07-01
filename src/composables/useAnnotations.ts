@@ -28,6 +28,27 @@ export async function fetchAllAnnotations(): Promise<Annotation[]> {
   }))
 }
 
+/**
+ * Deletes every annotation (and its replies, via cascade) anchored to a
+ * per-instance dynamic route — e.g. /warehouses/:id — for this project.
+ * Comments on static pages (no :id segment) are left alone.
+ *
+ * Call this alongside resetting your app's own demo/seed data: once a
+ * dynamically-created record (a receipt, a task, anything with a generated
+ * id) is wiped, any comment still pointing at its detail page is orphaned —
+ * the pin would show up on a now-empty page. Design feedback left on static
+ * pages isn't tied to that data, so it survives a reset.
+ */
+export async function clearDynamicAnnotations(): Promise<void> {
+  if (!_projectId) return
+  const sb = getSupabase()
+  await sb
+    .from('proto_review_annotations')
+    .delete()
+    .eq('project_id', _projectId)
+    .like('route_key', '%:id%')
+}
+
 export function useAnnotations(routeKey: Ref<string>) {
   const annotations = ref<Annotation[]>([])
   const loading = ref(false)

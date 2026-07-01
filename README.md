@@ -133,6 +133,30 @@ app.use(createProtoReview({
   covering it. Clicking a comment navigates to the exact page it was left on
   and opens its popover automatically.
 
+## Cleaning up comments when you reset demo data
+
+If your prototype has a "reset demo data" action (wiping seed/localStorage
+data back to a clean slate), pages with dynamically-created records — e.g.
+`/warehouses/wh-042` — no longer exist after the reset, but any comment
+pinned there still does. The pin ends up on an empty page.
+
+Call `clearDynamicAnnotations()` alongside your own reset, before reloading:
+
+```ts
+import { clearDynamicAnnotations } from '@ds/proto-review'
+
+async function resetDemoData() {
+  myAppResetFunction()
+  await clearDynamicAnnotations().catch(() => {}) // don't block the reset on a network hiccup
+  window.location.reload()
+}
+```
+
+This deletes every comment anchored to a parameterized route (any `route_key`
+containing `:id`, e.g. `/warehouses/:id`) for your `projectId`. Comments on
+static pages (`/warehouse`, `/settings`, anything without an id segment)
+aren't touched — that feedback isn't tied to demo data, so it survives.
+
 ## Migrating an existing database
 
 If you set up the tables before the `path` column existed, add it:

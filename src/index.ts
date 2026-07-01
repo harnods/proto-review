@@ -7,7 +7,7 @@ import ProtoReviewOverlay from './components/ProtoReviewOverlay.vue'
 
 export { ProtoReviewOverlay }
 export { useReviewMode } from './composables/useReviewMode'
-export { useAnnotations } from './composables/useAnnotations'
+export { useAnnotations, clearDynamicAnnotations } from './composables/useAnnotations'
 export type { Annotation, Reply, ProtoReviewConfig } from './types'
 
 export function createProtoReview(config: ProtoReviewConfig) {
