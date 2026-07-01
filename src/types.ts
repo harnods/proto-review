@@ -10,6 +10,8 @@ export interface Annotation {
   id: string
   project_id: string
   route_key: string
+  /** The concrete URL path at the moment the comment was created (e.g. /warehouses/wh-001). */
+  path: string | null
   x_pct: number
   y_pct: number
   author: string

@@ -9,6 +9,25 @@ export function initAnnotations(projectId: string) {
   _projectId = projectId
 }
 
+/** Fetches every annotation for this project across all pages — for the "All comments" panel. */
+export async function fetchAllAnnotations(): Promise<Annotation[]> {
+  if (!_projectId) return []
+  const sb = getSupabase()
+  const { data, error } = await sb
+    .from('proto_review_annotations')
+    .select('*, replies:proto_review_replies(*)')
+    .eq('project_id', _projectId)
+    .order('created_at', { ascending: false })
+
+  if (error || !data) return []
+  return data.map(a => ({
+    ...a,
+    replies: ((a.replies ?? []) as Reply[]).sort(
+      (x, y) => new Date(x.created_at).getTime() - new Date(y.created_at).getTime()
+    ),
+  }))
+}
+
 export function useAnnotations(routeKey: Ref<string>) {
   const annotations = ref<Annotation[]>([])
   const loading = ref(false)
@@ -40,6 +59,7 @@ export function useAnnotations(routeKey: Ref<string>) {
     yPct: number
     author: string
     body: string
+    path: string
   }): Promise<Annotation | null> {
     const sb = getSupabase()
     const { data, error } = await sb
@@ -47,6 +67,7 @@ export function useAnnotations(routeKey: Ref<string>) {
       .insert({
         project_id: _projectId,
         route_key: routeKey.value,
+        path: params.path,
         x_pct: params.xPct,
         y_pct: params.yPct,
         author: params.author,

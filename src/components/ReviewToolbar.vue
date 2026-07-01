@@ -41,11 +41,14 @@
         <button
           class="pr-btn pr-btn--ghost"
           @click="$emit('toggle-pins')"
-          :title="pinsVisible ? 'Hide comments' : 'Show comments'"
+          :title="pinsVisible ? 'Hide pins on this page' : 'Show pins on this page'"
         >
           {{ pinsVisible ? 'Hide' : 'Show' }}
         </button>
       </div>
+      <button class="pr-toolbar__all-comments" @click="$emit('show-all-comments')">
+        📋 Show comments
+      </button>
       <button class="pr-toolbar__exit" @click="$emit('exit-review-mode')">
         Exit review mode
       </button>
@@ -69,6 +72,7 @@ const emit = defineEmits<{
   'toggle-pins': []
   'set-name': [name: string]
   'exit-review-mode': []
+  'show-all-comments': []
 }>()
 
 const nameInput = ref('')
@@ -173,6 +177,24 @@ function saveName() {
   display: flex;
   gap: 6px;
   padding: 10px 14px;
+}
+
+.pr-toolbar__all-comments {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid #f0f0f0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #374151;
+  padding: 9px 14px;
+  text-align: center;
+}
+.pr-toolbar__all-comments:hover {
+  background: #f9fafb;
 }
 
 .pr-toolbar__exit {

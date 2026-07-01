@@ -58,6 +58,7 @@
       @toggle-pins="togglePins"
       @exit-review-mode="exitReviewMode"
       @set-name="setReviewerName"
+      @show-all-comments="showAllComments = true"
     />
 
     <!-- Crosshair hint -->
@@ -78,21 +79,32 @@
   >
     💬 Review
   </button>
+
+  <!-- Cross-page comment inbox — pushes the app content left, lists every
+       comment across every page, clicking one navigates there and opens it. -->
+  <AllCommentsPanel
+    v-if="showAllComments"
+    @close="showAllComments = false"
+    @select="handleSelectFromPanel"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useReviewMode } from '../composables/useReviewMode'
 import { useAnnotations } from '../composables/useAnnotations'
 import { showLauncher } from '../lib/launcherConfig'
+import { focusAnnotationId } from '../lib/focusAnnotation'
 import type { Annotation, PendingPin } from '../types'
 import AnnotationPin from './AnnotationPin.vue'
 import AnnotationPopover from './AnnotationPopover.vue'
 import NewCommentForm from './NewCommentForm.vue'
 import ReviewToolbar from './ReviewToolbar.vue'
+import AllCommentsPanel from './AllCommentsPanel.vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const {
   isReviewMode,
@@ -114,6 +126,7 @@ const { annotations, addAnnotation, addReply, toggleResolved, deleteAnnotation }
 
 const pendingPin = ref<PendingPin | null>(null)
 const activeAnnotationId = ref<string | null>(null)
+const showAllComments = ref(false)
 
 const activeAnnotation = computed(() =>
   activeAnnotationId.value
@@ -124,6 +137,29 @@ const activeAnnotation = computed(() =>
 onMounted(() => initFromQuery())
 
 watch(() => route.query, () => initFromQuery())
+
+// Once we've navigated to a comment's page (from the All comments panel),
+// open its popover as soon as that page's annotations have loaded.
+watch(annotations, (list) => {
+  if (!focusAnnotationId.value) return
+  if (list.some(a => a.id === focusAnnotationId.value)) {
+    activeAnnotationId.value = focusAnnotationId.value
+    pinsVisible.value = true
+    focusAnnotationId.value = null
+  }
+})
+
+function handleSelectFromPanel(ann: Annotation) {
+  showAllComments.value = false
+  const target = ann.path || ann.route_key
+  if (target && target !== route.path) {
+    focusAnnotationId.value = ann.id
+    router.push(target)
+  } else {
+    activeAnnotationId.value = ann.id
+    pinsVisible.value = true
+  }
+}
 
 function onOverlayClick(e: MouseEvent) {
   if (!isAddingMode.value || !reviewerName.value) return
@@ -163,6 +199,7 @@ async function handleNewComment(author: string, body: string) {
     yPct: pendingPin.value.y,
     author,
     body,
+    path: route.path,
   })
   pendingPin.value = null
   cancelAddMode()
