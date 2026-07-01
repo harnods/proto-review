@@ -7,6 +7,9 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "bin": {
+    "proto-review": "./bin/init.mjs"
+  },
   "license": "MIT",
   "peerDependencies": {
     "@supabase/supabase-js": "^2.0.0",

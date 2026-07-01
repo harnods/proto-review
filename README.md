@@ -23,14 +23,36 @@ If your project bundles with Vite/Nuxt, add the package to `transpile` (Nuxt)
 or make sure your bundler doesn't skip `node_modules/@ds/proto-review` — it
 ships as source `.ts`/`.vue`, not a pre-built bundle.
 
+## Quick setup (Nuxt)
+
+After installing, run the bundled init script — it patches `nuxt.config.ts`
+(`build.transpile`), creates `plugins/proto-review.client.ts` pre-filled with
+the shared Supabase project (see below), and mounts `<ProtoReviewOverlay />`
+in your `app.vue`. Safe to re-run — it skips anything already set up.
+
+```bash
+npm install github:harnods/proto-review
+npx proto-review init
+```
+
+The generated plugin defaults to the shared `proto-review` Supabase project
+so every prototype can reuse the same database — just make sure `projectId`
+(auto-filled from your `package.json` name) is unique per prototype so
+comments don't mix. Open `plugins/proto-review.client.ts` afterwards to
+double check or swap in your own Supabase project.
+
+Not a Nuxt project, or want to do it by hand? See Manual setup below.
+
+## Manual setup
+
+### 0. Nuxt transpile config
+
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
   build: { transpile: ['@ds/proto-review'] },
 })
 ```
-
-## Setup
 
 ### 1. Supabase tables
 
@@ -66,7 +88,7 @@ create policy "allow_all_annotations" on proto_review_annotations for all using 
 create policy "allow_all_replies" on proto_review_replies for all using (true) with check (true);
 ```
 
-### 2. Register the plugin
+### 2. Register the plugin (skip if you used `npx proto-review init`)
 
 ```ts
 // plugins/proto-review.client.ts (Nuxt) or main.ts (Vue)
@@ -80,7 +102,7 @@ app.use(createProtoReview({
 }))
 ```
 
-### 3. Mount the overlay
+### 3. Mount the overlay (skip if you used `npx proto-review init`)
 
 ```vue
 <!-- App.vue -->
@@ -98,6 +120,8 @@ app.use(createProtoReview({
   same color automatically (hashed from the name), so threads stay easy to
   scan across all pinned pages.
 - Click anywhere on the page to drop a pin and leave a comment.
+- Drag any pin to reposition it — a quick click still opens its popover;
+  the new position saves as soon as you let go.
 - Comments are anchored to a normalized route pattern (`/warehouses/:id`, not
   the exact id) — so all instances of a detail-page-shaped route share the
   same thread. Different pages (`/warehouse` vs `/product`) never bleed into
