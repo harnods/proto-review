@@ -98,6 +98,26 @@ export function useAnnotations(routeKey: Ref<string>) {
     }
   }
 
+  async function updatePosition(annotationId: string, xPct: number, yPct: number) {
+    const ann = annotations.value.find(a => a.id === annotationId)
+    if (!ann) return
+    const prevX = ann.x_pct
+    const prevY = ann.y_pct
+    ann.x_pct = xPct
+    ann.y_pct = yPct
+
+    const sb = getSupabase()
+    const { error } = await sb
+      .from('proto_review_annotations')
+      .update({ x_pct: xPct, y_pct: yPct })
+      .eq('id', annotationId)
+
+    if (error) {
+      ann.x_pct = prevX
+      ann.y_pct = prevY
+    }
+  }
+
   async function toggleResolved(annotationId: string) {
     const ann = annotations.value.find(a => a.id === annotationId)
     if (!ann) return
@@ -131,6 +151,7 @@ export function useAnnotations(routeKey: Ref<string>) {
     fetchAnnotations,
     addAnnotation,
     addReply,
+    updatePosition,
     toggleResolved,
     deleteAnnotation,
   }

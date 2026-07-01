@@ -14,6 +14,7 @@
       :pins-visible="pinsVisible"
       :active="activeAnnotationId === ann.id"
       @click="openAnnotation(ann)"
+      @move="(x, y) => updatePosition(ann.id, x, y)"
     />
 
     <!-- Temporary pending pin before form submit -->
@@ -121,7 +122,7 @@ const {
   setReviewerName,
 } = useReviewMode()
 
-const { annotations, addAnnotation, addReply, toggleResolved, deleteAnnotation } =
+const { annotations, addAnnotation, addReply, updatePosition, toggleResolved, deleteAnnotation } =
   useAnnotations(routeKey)
 
 const pendingPin = ref<PendingPin | null>(null)

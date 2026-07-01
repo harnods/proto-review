@@ -2,14 +2,14 @@
   <button
     v-if="pinsVisible"
     class="pr-pin"
-    :class="{ 'pr-pin--active': active }"
+    :class="{ 'pr-pin--active': active, 'pr-pin--dragging': isDragging }"
     :style="{
-      left: annotation.x_pct + '%',
-      top: annotation.y_pct + '%',
+      left: displayX + '%',
+      top: displayY + '%',
       background: authorColor,
     }"
     :title="annotation.author + ': ' + annotation.body"
-    @click.stop="$emit('click')"
+    @pointerdown="onPointerDown"
   >
     {{ index + 1 }}
     <span v-if="annotation.resolved" class="pr-pin__resolved-badge">✓</span>
@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import type { Annotation } from '../types'
 import { getAuthorColor } from '../lib/authorColor'
 
@@ -31,9 +31,73 @@ const props = defineProps<{
   active: boolean
 }>()
 
-defineEmits<{ click: [] }>()
+const emit = defineEmits<{
+  click: []
+  move: [xPct: number, yPct: number]
+}>()
 
 const authorColor = computed(() => getAuthorColor(props.annotation.author))
+
+const DRAG_THRESHOLD_PX = 4
+
+const isDragging = ref(false)
+const dragPos = ref<{ x: number; y: number } | null>(null)
+
+const displayX = computed(() => dragPos.value?.x ?? props.annotation.x_pct)
+const displayY = computed(() => dragPos.value?.y ?? props.annotation.y_pct)
+
+function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n))
+}
+
+let overlayRect: DOMRect | null = null
+let startClientX = 0
+let startClientY = 0
+
+function onPointerDown(e: PointerEvent) {
+  if (e.button !== 0) return
+  e.stopPropagation()
+
+  const overlay = (e.currentTarget as HTMLElement).closest('.pr-overlay') as HTMLElement | null
+  if (!overlay) return
+
+  overlayRect = overlay.getBoundingClientRect()
+  startClientX = e.clientX
+  startClientY = e.clientY
+  isDragging.value = false
+
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+
+function onPointerMove(e: PointerEvent) {
+  const dx = e.clientX - startClientX
+  const dy = e.clientY - startClientY
+
+  if (!isDragging.value && Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return
+  isDragging.value = true
+
+  if (!overlayRect) return
+  dragPos.value = {
+    x: clamp(((e.clientX - overlayRect.left) / overlayRect.width) * 100, 0, 100),
+    y: clamp(((e.clientY - overlayRect.top) / overlayRect.height) * 100, 0, 100),
+  }
+}
+
+function onPointerUp() {
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+
+  if (isDragging.value && dragPos.value) {
+    emit('move', dragPos.value.x, dragPos.value.y)
+  } else {
+    emit('click')
+  }
+
+  isDragging.value = false
+  dragPos.value = null
+  overlayRect = null
+}
 </script>
 
 <style scoped>
@@ -51,10 +115,11 @@ const authorColor = computed(() => getAuthorColor(props.annotation.author))
   justify-content: center;
   border: 2px solid #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  cursor: pointer;
+  cursor: grab;
   transform: translate(-50%, -50%);
   pointer-events: all;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: box-shadow 0.15s;
+  touch-action: none;
   z-index: 1;
 }
 
@@ -62,6 +127,13 @@ const authorColor = computed(() => getAuthorColor(props.annotation.author))
 .pr-pin--active {
   transform: translate(-50%, -50%) scale(1.2);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.pr-pin--dragging {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: none;
 }
 
 .pr-pin__resolved-badge {
