@@ -157,6 +157,12 @@ app.use(createProtoReview({
   `createProtoReview({ viewParams: ['tab', 'view'] })`, or `[]` to scope by
   path only. Other params (`?page=`, `?saved=`) are ignored so they don't
   fragment threads.
+- **Modal/drawer-aware:** a comment left inside a modal or drawer only shows
+  while that overlay is open. Because pins anchor to a DOM element and only
+  render while that element is actually visible (`checkVisibility`), closing
+  the overlay hides the pin and reopening brings it back — no URL or host
+  cooperation needed. (One left in the panel list; open the overlay to see it
+  in place.)
 - Review mode persists across page navigation for the browser session
   (`sessionStorage`), so it doesn't drop when the app's router changes the URL.
 - **Show comments** (in the toolbar) opens a cross-page inbox of every comment
