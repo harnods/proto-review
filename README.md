@@ -151,6 +151,12 @@ app.use(createProtoReview({
   the exact id) — so all instances of a detail-page-shaped route share the
   same thread. Different pages (`/warehouse` vs `/product`) never bleed into
   each other.
+- **Tab-aware:** if a page keeps its active tab in the query string
+  (`?tab=Receiving`), comments scope to that tab — one left on `?tab=A` won't
+  show on `?tab=B`. By default only the `tab` param counts; configure with
+  `createProtoReview({ viewParams: ['tab', 'view'] })`, or `[]` to scope by
+  path only. Other params (`?page=`, `?saved=`) are ignored so they don't
+  fragment threads.
 - Review mode persists across page navigation for the browser session
   (`sessionStorage`), so it doesn't drop when the app's router changes the URL.
 - **Show comments** (in the toolbar) opens a cross-page inbox of every comment

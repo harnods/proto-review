@@ -120,6 +120,7 @@ const {
   pinsVisible,
   reviewerName,
   routeKey,
+  viewPath,
   initFromQuery,
   exitReviewMode,
   enterReviewMode,
@@ -328,7 +329,7 @@ async function handleNewComment(author: string, body: string) {
     anchorYPct: p.anchor?.yPct ?? null,
     author,
     body,
-    path: route.path,
+    path: viewPath.value,
   })
   pendingPin.value = null
   cancelAddMode()
