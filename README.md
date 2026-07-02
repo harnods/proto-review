@@ -41,6 +41,23 @@ so every prototype can reuse the same database — just make sure `projectId`
 comments don't mix. Open `plugins/proto-review.client.ts` afterwards to
 double check or swap in your own Supabase project.
 
+**The floating "Review" button is a fallback, not the goal.** Before writing
+the plugin file, init scans your project for something that looks like an
+existing user/account menu (a `.vue` file mentioning both a sign-out action
+and `MpAvatar`/`MpPopover`/a menu-ish component name) and asks:
+
+```
+Add the Review mode toggle to an existing user menu instead of a floating button? (Y/n)
+Path to that file [components/AppUserMenu.vue]:
+```
+
+Say yes and it bakes `showLauncher: false` into the plugin and prints the
+exact snippet to paste into that file (import `useReviewMode`, add a button
+that calls `toggleReviewMode`). Say no, or if nothing was found, or if you're
+running init non-interactively (no TTY), it defaults to the floating button
+— so the toggle always exists somewhere, it just prefers to live where users
+already expect account-level settings.
+
 Not a Nuxt project, or want to do it by hand? See Manual setup below.
 
 ## Manual setup
