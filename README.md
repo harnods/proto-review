@@ -157,6 +157,10 @@ app.use(createProtoReview({
   in the project, in a dark panel that pushes the whole app left instead of
   covering it. Clicking a comment navigates to the exact page it was left on
   and opens its popover automatically.
+- **Resolved comments are hidden by default** — their pins drop off the page
+  and they're filtered out of the panel, so review stays focused on what's
+  still open. The panel has a **Hide resolved** toggle (checked by default);
+  unchecking it brings resolved comments back both in the list and as pins.
 
 ## Fix with Claude (optional, local only)
 
