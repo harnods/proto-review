@@ -160,11 +160,25 @@ function bumpLayout() {
 let resizeObserver: ResizeObserver | null = null
 let intervalId: ReturnType<typeof setInterval> | null = null
 
+// Press "c" to start dropping a comment (like Figma). Ignored while typing
+// in a field, holding a modifier (so browser/app shortcuts still work), or
+// when review mode is off.
+function onKeydown(e: KeyboardEvent) {
+  if (!isReviewMode.value) return
+  if (e.key !== 'c' && e.key !== 'C') return
+  if (e.metaKey || e.ctrlKey || e.altKey) return
+  const el = e.target as HTMLElement | null
+  if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return
+  e.preventDefault()
+  if (!isAddingMode.value) toggleAddMode()
+}
+
 onMounted(() => {
   initFromQuery()
   // capture: true also catches scrolls of inner scrollable containers
   window.addEventListener('scroll', bumpLayout, { capture: true, passive: true })
   window.addEventListener('resize', bumpLayout)
+  window.addEventListener('keydown', onKeydown)
   // Reflows that fire no scroll/resize event (async data landing, fonts,
   // images) still move anchor elements — a body ResizeObserver catches most
   // of those, and a slow interval sweeps up anything that changes layout
@@ -177,6 +191,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', bumpLayout, { capture: true })
   window.removeEventListener('resize', bumpLayout)
+  window.removeEventListener('keydown', onKeydown)
   resizeObserver?.disconnect()
   if (intervalId !== null) clearInterval(intervalId)
   if (rafId !== null) cancelAnimationFrame(rafId)

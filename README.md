@@ -139,10 +139,12 @@ app.use(createProtoReview({
 - First time, they type a name. Every comment/pin from that name gets the
   same color automatically (hashed from the name), so threads stay easy to
   scan across all pinned pages.
-- Click anywhere on the page to drop a pin and leave a comment. The pin
-  anchors to the DOM element under the cursor, so it scrolls with the content
-  and stays glued to what was commented on even when the layout shifts. If
-  that element ever disappears, the pin falls back to its viewport position.
+- Press **`c`** (or click **+ Add Comment**) to start dropping a pin, then
+  click anywhere on the page to place it. The comment box opens already
+  focused, so you can type right away. The pin anchors to the DOM element
+  under the cursor, so it scrolls with the content and stays glued to what
+  was commented on even when the layout shifts. If that element ever
+  disappears, the pin falls back to its viewport position.
 - Drag any pin to reposition it — a quick click still opens its popover;
   the new position (and its new element anchor) saves as soon as you let go.
 - Comments are anchored to a normalized route pattern (`/warehouses/:id`, not
