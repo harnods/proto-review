@@ -82,8 +82,11 @@ create table proto_review_annotations (
   project_id text not null,
   route_key text not null,
   path text, -- concrete URL at creation time, used by the All comments panel to navigate
-  x_pct float not null,
+  x_pct float not null,  -- viewport %, fallback position
   y_pct float not null,
+  anchor_selector text,  -- CSS selector of the element the pin is attached to
+  anchor_x_pct float,    -- offset within that element, % of its box
+  anchor_y_pct float,
   author text not null default 'Anonymous',
   body text not null,
   resolved boolean default false,
@@ -136,9 +139,12 @@ app.use(createProtoReview({
 - First time, they type a name. Every comment/pin from that name gets the
   same color automatically (hashed from the name), so threads stay easy to
   scan across all pinned pages.
-- Click anywhere on the page to drop a pin and leave a comment.
+- Click anywhere on the page to drop a pin and leave a comment. The pin
+  anchors to the DOM element under the cursor, so it scrolls with the content
+  and stays glued to what was commented on even when the layout shifts. If
+  that element ever disappears, the pin falls back to its viewport position.
 - Drag any pin to reposition it — a quick click still opens its popover;
-  the new position saves as soon as you let go.
+  the new position (and its new element anchor) saves as soon as you let go.
 - Comments are anchored to a normalized route pattern (`/warehouses/:id`, not
   the exact id) — so all instances of a detail-page-shaped route share the
   same thread. Different pages (`/warehouse` vs `/product`) never bleed into
@@ -181,6 +187,18 @@ If you set up the tables before the `path` column existed, add it:
 ```sql
 alter table proto_review_annotations add column if not exists path text;
 ```
+
+If you set them up before element anchoring (v0.2.0), add:
+
+```sql
+alter table proto_review_annotations
+  add column if not exists anchor_selector text,
+  add column if not exists anchor_x_pct float,
+  add column if not exists anchor_y_pct float;
+```
+
+Rows without an anchor keep working — they render at their stored viewport
+position, exactly as before.
 
 Older rows without a `path` fall back to their `route_key` in the All
 comments panel (works for static pages, not exact for parameterized ones).
