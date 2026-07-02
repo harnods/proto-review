@@ -2,7 +2,7 @@ import type { App } from 'vue'
 import type { ProtoReviewConfig } from './types'
 import { initSupabase } from './lib/supabase'
 import { initAnnotations } from './composables/useAnnotations'
-import { setShowLauncher } from './lib/launcherConfig'
+import { setShowLauncher, setCornerPosition } from './lib/launcherConfig'
 import ProtoReviewOverlay from './components/ProtoReviewOverlay.vue'
 
 export { ProtoReviewOverlay }
@@ -16,6 +16,7 @@ export function createProtoReview(config: ProtoReviewConfig) {
       initSupabase(config.supabaseUrl, config.supabaseKey)
       initAnnotations(config.projectId)
       setShowLauncher(config.showLauncher ?? true)
+      setCornerPosition(config.corner ?? 'bottom-right')
       app.component('ProtoReviewOverlay', ProtoReviewOverlay)
     },
   }

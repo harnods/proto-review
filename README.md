@@ -207,6 +207,16 @@ const { isReviewMode, toggleReviewMode } = useReviewMode()
 </template>
 ```
 
+## Moving the toolbar off bottom-right
+
+The floating launcher and the review toolbar dock to the bottom-right corner
+by default. If your app already puts something there (a scenario/environment
+switcher, a chat widget, etc.), move proto-review to the opposite corner:
+
+```ts
+createProtoReview({ /* ...config */, corner: 'bottom-left' })
+```
+
 ## Updating this package
 
 This ships as source (no build step). To pull the latest version into a

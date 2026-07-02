@@ -36,4 +36,10 @@ export interface ProtoReviewConfig {
    * toggle (e.g. into an existing user menu) via useReviewMode().toggleReviewMode.
    */
   showLauncher?: boolean
+  /**
+   * Which corner the floating launcher and the review toolbar dock to
+   * (default 'bottom-right'). Change this if your host app already puts
+   * something there — e.g. a scenario/environment switcher.
+   */
+  corner?: 'bottom-right' | 'bottom-left'
 }

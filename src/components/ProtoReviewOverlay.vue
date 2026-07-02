@@ -75,6 +75,7 @@
   <button
     v-else-if="showLauncher"
     class="pr-launcher"
+    :class="{ 'pr-launcher--left': cornerPosition === 'bottom-left' }"
     title="Turn on review mode"
     @click="enterReviewMode"
   >
@@ -95,7 +96,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useReviewMode } from '../composables/useReviewMode'
 import { useAnnotations } from '../composables/useAnnotations'
-import { showLauncher } from '../lib/launcherConfig'
+import { showLauncher, cornerPosition } from '../lib/launcherConfig'
 import { focusAnnotationId } from '../lib/focusAnnotation'
 import type { Annotation, PendingPin } from '../types'
 import AnnotationPin from './AnnotationPin.vue'
@@ -289,6 +290,10 @@ async function handleDelete(annotationId: string) {
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   transition: transform 0.15s, box-shadow 0.15s;
+}
+.pr-launcher--left {
+  right: auto;
+  left: 24px;
 }
 .pr-launcher:hover {
   transform: translateY(-2px);
