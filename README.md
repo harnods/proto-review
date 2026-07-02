@@ -158,6 +158,32 @@ app.use(createProtoReview({
   covering it. Clicking a comment navigates to the exact page it was left on
   and opens its popover automatically.
 
+## Fix with Claude (optional, local only)
+
+Each comment can carry a **⚡ Fix with Claude** button that hands the comment —
+plus the page, the anchored element's selector, and the surrounding text — to
+a headless `claude -p` run that edits your working tree. Your dev server
+hot-reloads the change; no terminal window opens.
+
+Run the bridge from your project root in a separate terminal:
+
+```bash
+npx proto-review bridge
+```
+
+The button only appears on `localhost` **and** only when the bridge is
+reachable — so it's invisible to anyone viewing a deployed prototype, and to
+you until you start the bridge. Point the overlay at a non-default port with
+`createProtoReview({ fixBridgeUrl: 'http://localhost:5000' })`.
+
+**Safety.** Comments live in a public, no-auth table, so their text is
+untrusted. The bridge runs Claude with **Bash disabled** (`--disallowedTools
+Bash`), so an injected comment can't run shell commands — the worst case is an
+unwanted file edit, which shows up in `git diff` and can be discarded. Always
+review the diff before keeping a fix. If your prototype's comments could come
+from untrusted people and you don't want any auto-edits, just don't run the
+bridge — everything else works without it.
+
 ## Cleaning up comments when you reset demo data
 
 If your prototype has a "reset demo data" action (wiping seed/localStorage
