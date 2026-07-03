@@ -32,7 +32,7 @@
       <button
         class="pr-main"
         :class="{ 'pr-main--active': isAddingMode }"
-        :title="isAddingMode ? 'Cancel (Esc)' : 'Add comment (C)'"
+        :data-tip="isAddingMode ? 'Cancel' : 'Add comment · C'"
         :aria-label="isAddingMode ? 'Cancel adding comment' : 'Add comment'"
         @click="$emit('toggle-add-mode')"
       >
@@ -42,19 +42,19 @@
 
       <!-- Right group: tools (collapses when idle) -->
       <div class="pr-grp pr-grp--right">
-        <button class="pr-t" :title="pinsVisible ? 'Hide pins' : 'Show pins'" :aria-label="pinsVisible ? 'Hide pins' : 'Show pins'" @click="$emit('toggle-pins')">
+        <button class="pr-t" :data-tip="pinsVisible ? 'Hide pins' : 'Show pins'" :aria-label="pinsVisible ? 'Hide pins' : 'Show pins'" @click="$emit('toggle-pins')">
           <svg v-if="pinsVisible" viewBox="0 0 24 24" class="pr-ic"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
           <svg v-else viewBox="0 0 24 24" class="pr-ic"><path d="M3 3l18 18"/><path d="M10.6 6.1A9.7 9.7 0 0 1 12 6c6.4 0 10 6 10 6a15 15 0 0 1-3.3 3.9M6.1 6.2A15 15 0 0 0 2 12s3.6 7 10 7a9.3 9.3 0 0 0 4-.9"/></svg>
         </button>
 
-        <button class="pr-t" title="All comments" aria-label="All comments" @click="$emit('show-all-comments')">
+        <button class="pr-t" data-tip="All comments" aria-label="All comments" @click="$emit('show-all-comments')">
           <svg viewBox="0 0 24 24" class="pr-ic"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>
           <span v-if="annotationsCount" class="pr-badge" :title="hiddenCount ? `${hiddenCount} inside a closed panel — open it to see the pin` : ''">{{ annotationsCount }}</span>
         </button>
 
         <span class="pr-sep" />
 
-        <button class="pr-t" title="Exit review mode" aria-label="Exit review mode" @click="$emit('exit-review-mode')">
+        <button class="pr-t" data-tip="Exit review mode" aria-label="Exit review mode" @click="$emit('exit-review-mode')">
           <svg viewBox="0 0 24 24" class="pr-ic"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
         </button>
       </div>
@@ -133,6 +133,10 @@ function saveName() {
 .pr-tb--open .pr-grp {
   max-width: 320px;
   opacity: 1;
+  /* Let tooltips escape upward — but only after the expand finishes, so the
+     content doesn't spill sideways while the pill is still widening. */
+  overflow: visible;
+  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, overflow 0s 0.3s;
 }
 .pr-grp--left { justify-content: flex-end; }
 
@@ -202,6 +206,30 @@ function saveName() {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Tooltips — appear above each button on hover */
+.pr-main,
+.pr-t { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #33312d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  padding: 5px 8px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+  z-index: 4;
+}
+[data-tip]:hover::after { opacity: 1; }
 
 .pr-badge {
   position: absolute;
