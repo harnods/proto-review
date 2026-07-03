@@ -161,8 +161,23 @@ app.use(createProtoReview({
   while that overlay is open. Because pins anchor to a DOM element and only
   render while that element is actually visible (`checkVisibility`), closing
   the overlay hides the pin and reopening brings it back — no URL or host
-  cooperation needed. (One left in the panel list; open the overlay to see it
-  in place.)
+  cooperation needed.
+  - **Auto-open from the panel:** by default, clicking such a comment in the
+    All comments panel can't reopen the overlay (it's not in the URL), so you'd
+    have to open it yourself. To make it reopen automatically, drive the
+    overlay's open state through the URL with the `useUrlModal` helper:
+
+    ```ts
+    import { useUrlModal } from '@ds/proto-review'
+    // was: const open = ref(false)
+    const open = useUrlModal('edit-location')   // ?overlay=edit-location
+    // bind as before: v-model:is-open / :is-open + @update:is-open
+    ```
+
+    That one line makes the overlay's state live in `?overlay=<key>`, which
+    (a) scopes comments to it, (b) lets the browser back button close it, and
+    (c) reopens it automatically when a comment is opened from the panel. Give
+    each overlay on a page a distinct key.
 - Review mode persists across page navigation for the browser session
   (`sessionStorage`), so it doesn't drop when the app's router changes the URL.
 - **Show comments** (in the toolbar) opens a cross-page inbox of every comment

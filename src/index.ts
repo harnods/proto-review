@@ -9,6 +9,7 @@ import ProtoReviewOverlay from './components/ProtoReviewOverlay.vue'
 
 export { ProtoReviewOverlay }
 export { useReviewMode } from './composables/useReviewMode'
+export { useUrlModal } from './composables/useUrlModal'
 export { useAnnotations, clearDynamicAnnotations } from './composables/useAnnotations'
 export type { Annotation, Reply, ProtoReviewConfig } from './types'
 

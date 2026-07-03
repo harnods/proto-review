@@ -16,6 +16,12 @@ export function setViewParams(params: string[]) {
   _viewParams = params ?? []
 }
 
+/** Adds a param to the view allowlist without clobbering existing ones.
+ *  Used by useUrlModal so URL-driven overlays auto-scope + auto-reopen. */
+export function addViewParam(param: string) {
+  if (!_viewParams.includes(param)) _viewParams = [..._viewParams, param]
+}
+
 /** e.g. { tab: 'Receiving', saved: '1' } -> '?tab=Receiving' (only allowlisted, sorted). */
 export function viewQuerySuffix(query: LocationQuery): string {
   const parts: string[] = []
